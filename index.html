@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Exchange & Review</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background-color: #e6f0fa; padding-top: 20px; }
+    .book-card { transition: 0.3s; margin-bottom: 20px; height: 100%; }
+    .book-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .book-cover { height: 200px; object-fit: contain; background-color: #f1eeee; }
+    .rating-stars { color: #ffc400; }
+     .chart-container { background: white; border-radius: 10px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .tittle-container {  background: linear-gradient(135deg, #bb83f7, #cad8f0);  color: white; border-radius: 20px; padding: 50px; margin-bottom: 50px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); } 
+    .quote-container { background-image: url('https://i.pinimg.com/736x/ed/67/d9/ed67d977d5271d0af77a7b28cf32db43.jpg'); color: black;   border-radius: 10px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .form-container { background: white; border-radius: 10px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+<div class="container">
+   <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="books" role="tabpanel">
+      <div class="tittle-container mb-4 text-center">
+  <h2 class="text-center mb-4">📚 Book Store & Rating </h2>
+      </div>
+    </div>
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="books-tab" data-bs-toggle="tab" data-bs-target="#books" type="button" role="tab">All Books</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add" type="button" role="tab">Add Book</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">Analytics</button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="myTabContent">
+    <!-- Books Tab -->
+    <div class="tab-pane fade show active" id="books" role="tabpanel">
+      <div class="quote-container mb-4 text-center">
+        <h5 id="quote-text">"Loading quote..."</h5>
+        <p id="quote-author"></p>
+      </div>
+
+      <div class="mb-3 row">
+        <div class="col-md-6">
+          <input type="text" id="search" class="form-control" placeholder="Search books by title..." />
+        </div>
+      </div>
+
+      <div class="row" id="book-list"></div>
+    </div>
+
+    <!-- Add Book Tab -->
+    <div class="tab-pane fade" id="add" role="tabpanel">
+      <div class="form-container">
+        <h4 class="mb-4">Add New Book</h4>
+        <form id="add-book-form">
+          <div class="mb-3">
+            <label for="book-title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="book-title" required>
+          </div>
+          <div class="mb-3">
+            <label for="book-author" class="form-label">Author</label>
+            <input type="text" class="form-control" id="book-author" required>
+          </div>
+          <div class="mb-3">
+         <label for="book-genre" class="form-label">Genre</label>
+<select class="form-select" id="book-genre" required>
+<option value="">Select a genre</option>
+<option value="Fiction">Fiction</option>
+<option value="Non-Fiction">Non-Fiction</option>
+<option value="Science Fiction">Science Fiction</option>
+<option value="Fantasy">Fantasy</option>
+<option value="Mystery">Mystery</option>
+<option value="Romance">Romance</option>
+<option value="Biography">Biography</option>
+<option value="History">History</option>
+<option value="Self-Help">Self-Help</option>
+<option value="Other">Other</option>
+</select>  
+</div>
+          <div class="mb-3">
+            <label for="book-cover" class="form-label">Cover Image URL</label>
+            <input type="text" class="form-control" id="book-cover" placeholder="https://example.com/image.jpg">
+          </div>
+          <div class="mb-3">
+            <label for="book-rating" class="form-label">Rating (1-5)</label>
+            <input type="number" class="form-control" id="book-rating" min="1" max="5" value="3">
+          </div>
+          <button type="submit" class="btn btn-primary">Add Book</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div class="tab-pane fade" id="analytics" role="tabpanel">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="chart-container">
+            <h4>Books by Genre</h4>
+            <canvas id="genre-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let books = [
+  {bookId: 1,title: "1984", cover: "https://covers.openlibrary.org/b/id/14845126-M.jpg", author: "Orwell", genre: "Dystopian", rating: 5 },
+  {bookId: 2, title: "Harry Potter", cover: "https://covers.openlibrary.org/b/id/14342026-L.jpg", author: "J.K. Rowling", genre: "Fantasy", rating: 4 },
+  {bookId: 3,title: "The Alchemist", cover: "https://covers.openlibrary.org/b/id/15102369-M.jpg", author: "Coelho", genre: "Philosophy",  rating: 5 },
+  {bookId: 4,  title: "The Hobbit", cover: "https://covers.openlibrary.org/b/id/14627222-M.jpg", author: "Tolkien", genre: "Fantasy",rating: 5 },
+  {bookId: 5,  title: "To Kill a Mockingbird", cover: "https://covers.openlibrary.org/b/id/14817209-M.jpg", author: "Harper Lee", genre: "Classic", rating: 5 },
+  {bookId: 6, title: "Atomic Habits", cover: "https://covers.openlibrary.org/b/id/15108516-L.jpg", author: "James Clear", genre: "Self-Help", rating: 5 },
+  {bookId: 7,  title: "Sapiens", cover: "https://covers.openlibrary.org/b/id/8284312-M.jpg", author: "Yuval Noah Harari", genre: "History", rating: 4 },
+  {bookId: 8,  title: "The Great Gatsby", author: "F. Scott Fitzgerald", genre: "Classic",  rating: 4, cover: "https://covers.openlibrary.org/b/id/12364437-M.jpg" },
+  {bookId: 9, title: "The Catcher in the Rye", cover: "https://covers.openlibrary.org/b/id/14845128-M.jpg", author: "J.D. Salinger", genre: "Classic", rating: 3 },
+  {bookId: 10, title: "Rich Dad Poor Dad", cover: "https://covers.openlibrary.org/b/id/15108516-L.jpg", author: "Robert Kiyosaki", genre: "Finance",rating: 4 }
+];
+
+const quotes = [
+  { text: "A reader lives a thousand lives before he dies.", author: "George R.R. Martin" },
+  { text: "Books are a uniquely portable magic.", author: "Stephen King" },
+  { text: "The more you read, the more things you know.", author: "Dr. Seuss" },
+  {text: "Books are like books, they never lie.", author: "Stephen King" },
+];
+
+const bookList = document.getElementById("book-list");
+const searchInput = document.getElementById("search");
+const addBookForm = document.getElementById("add-book-form");
+
+let genreChart = null;
+
+function renderBooks(filteredBooks = books) {
+  bookList.innerHTML = "";
+  if (!filteredBooks.length) {
+    bookList.innerHTML = '<p class="text-center">No books found.</p>';
+    return;
+  }
+
+  filteredBooks.forEach(book => {
+    const col = document.createElement("div");
+    col.className = "col-md-4";
+    col.innerHTML = `
+      <div class="card book-card">
+        <img src="${book.cover || 'https://via.placeholder.com/300x450?text=No+Cover'}" class="card-img-top book-cover" alt="${book.title}">
+        <div class="card-body">
+          <h5 class="card-title">${book.title}</h5>
+          <p class="card-text text-muted">${book.author}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">${book.genre}</small>
+            <div class="rating-stars">
+              ${'★'.repeat(book.rating)}${'☆'.repeat(5 - book.rating)}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    bookList.appendChild(col);
+  });
+}
+
+function filterBooks() {
+  const searchTerm = searchInput.value.toLowerCase();
+  const filtered = books.filter(book => book.title.toLowerCase().includes(searchTerm));
+  renderBooks(filtered);
+}
+
+function loadQuote() {
+  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  document.getElementById("quote-text").textContent = `"${randomQuote.text}"`;
+  document.getElementById("quote-author").textContent = `— ${randomQuote.author}`;
+}
+
+function drawChart() {
+  const genreCounts = {};
+  books.forEach(book => {
+    genreCounts[book.genre] = (genreCounts[book.genre] || 0) + 1;
+  });
+
+  const ctx = document.getElementById('genre-chart').getContext('2d');
+  if (genreChart) genreChart.destroy();
+
+  genreChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(genreCounts),
+      datasets: [{
+        data: Object.values(genreCounts),
+        backgroundColor: [
+          '#ff6384', '#36a2eb', '#cc65fe', '#ffce56', 
+          '#4bc0c0', '#9966ff', '#ff9f40', '#8ac249'
+        ]
+      }]
+    },
+    options: { responsive: true }
+  });
+}
+
+function addBook(event) {
+  event.preventDefault();
+
+  const newBook = {
+    bookId: books.length + 1,
+    title: document.getElementById("book-title").value,
+    author: document.getElementById("book-author").value,
+    genre: document.getElementById("book-genre").value,
+    cover: document.getElementById("book-cover").value || 'https://via.placeholder.com/300x450?text=No+Cover',
+    rating: parseInt(document.getElementById("book-rating").value),
+  };
+
+  books.push(newBook);
+  renderBooks();
+  drawChart();
+  addBookForm.reset();
+  new bootstrap.Tab(document.getElementById('books-tab')).show();
+}
+
+function init() {
+  renderBooks();
+  loadQuote();
+  drawChart();
+  searchInput.addEventListener("input", filterBooks);
+  addBookForm.addEventListener("submit", addBook);
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+https://www.pinterest.com/pin/4151824652161840/
